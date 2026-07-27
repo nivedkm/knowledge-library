@@ -1,0 +1,42 @@
+[project]
+name = "wisdom-api"
+version = "0.1.0"
+description = "Local-first personal knowledge retrieval API"
+readme = "../README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115,<1.0",
+    "pydantic-settings>=2.7,<3.0",
+    "uvicorn[standard]>=0.34,<1.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.9,<3.0",
+    "mypy>=1.14,<2.0",
+    "pytest>=8.3,<10.0",
+    "ruff>=0.9,<1.0",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["app", "tests"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
