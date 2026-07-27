@@ -12,6 +12,7 @@ foundation contains:
 - Local PostgreSQL in a pinned pgvector-enabled container
 - SQLAlchemy connection and session management
 - Alembic database migrations
+- Validated REST endpoints for managing books and notes
 - Tests, linting, formatting, and type-checking configuration
 - No book/note tables, embeddings, retrieval, or language model yet
 
@@ -139,4 +140,5 @@ npm run build
 - [Milestone 1 architecture](docs/architecture.md)
 - [Database fundamentals](docs/database-fundamentals.md)
 - [Book and note data model](docs/data-model.md)
+- [Book and note API design](docs/api-design.md)
 - [ADR 001: modular monolith](docs/decisions/001-modular-monolith.md)
