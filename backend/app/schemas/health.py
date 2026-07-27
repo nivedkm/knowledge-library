@@ -8,3 +8,10 @@ class HealthResponse(BaseModel):
 
     status: Literal["ok"]
     service: str
+
+
+class ReadinessResponse(BaseModel):
+    """Response returned when required infrastructure is available."""
+
+    status: Literal["ready"]
+    database: Literal["connected"]

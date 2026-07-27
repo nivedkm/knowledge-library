@@ -5,12 +5,15 @@ you organize books and reading notes, retrieve relevant notes, and eventually
 generate answers grounded only in those notes.
 
 This repository is being built one verified milestone at a time. The current
-milestone contains only the application foundation:
+foundation contains:
 
 - A FastAPI backend with a health endpoint
 - A React, Vite, and TypeScript frontend
+- Local PostgreSQL in a pinned pgvector-enabled container
+- SQLAlchemy connection and session management
+- Alembic database migrations
 - Tests, linting, formatting, and type-checking configuration
-- No database, embeddings, retrieval, or language model yet
+- No book/note tables, embeddings, retrieval, or language model yet
 
 ## How the current milestone fits together
 
@@ -35,6 +38,7 @@ database.
 - `uv` for Python dependency management
 - Node.js 22.13 or later
 - npm
+- Docker and `docker-compose`
 
 ## First-time setup
 
@@ -64,6 +68,19 @@ versions.
 
 ## Run the application
 
+Start PostgreSQL from the project root:
+
+```bash
+docker-compose up -d database
+```
+
+Apply all database migrations:
+
+```bash
+cd backend
+uv run alembic upgrade head
+```
+
 In one terminal:
 
 ```bash
@@ -83,7 +100,17 @@ Then open `http://localhost:5173`.
 Useful backend pages:
 
 - API health: `http://localhost:8000/api/v1/health`
+- Database readiness: `http://localhost:8000/api/v1/readiness`
 - Interactive API docs: `http://localhost:8000/docs`
+
+Stop PostgreSQL without deleting its data:
+
+```bash
+docker-compose stop database
+```
+
+The named Docker volume keeps your database between restarts. Do not use
+`docker-compose down -v` unless you intentionally want to delete local data.
 
 ## Quality checks
 
@@ -110,4 +137,5 @@ npm run build
 ## Documentation
 
 - [Milestone 1 architecture](docs/architecture.md)
+- [Database fundamentals](docs/database-fundamentals.md)
 - [ADR 001: modular monolith](docs/decisions/001-modular-monolith.md)
