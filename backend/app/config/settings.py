@@ -1,13 +1,16 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+PROJECT_ENV_FILE = Path(__file__).resolve().parents[3] / ".env"
 
 
 class Settings(BaseSettings):
     """Values that may change between development and production."""
 
     model_config = SettingsConfigDict(
-        env_file="../.env",
+        env_file=PROJECT_ENV_FILE,
         env_prefix="WISDOM_",
         extra="ignore",
     )
