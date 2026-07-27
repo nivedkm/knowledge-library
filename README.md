@@ -138,4 +138,5 @@ npm run build
 
 - [Milestone 1 architecture](docs/architecture.md)
 - [Database fundamentals](docs/database-fundamentals.md)
+- [Book and note data model](docs/data-model.md)
 - [ADR 001: modular monolith](docs/decisions/001-modular-monolith.md)
