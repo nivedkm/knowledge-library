@@ -13,6 +13,7 @@ foundation contains:
 - SQLAlchemy connection and session management
 - Alembic database migrations
 - Validated REST endpoints for managing books and notes
+- Responsive React screens for managing the local book and note library
 - Tests, linting, formatting, and type-checking configuration
 - No book/note tables, embeddings, retrieval, or language model yet
 
@@ -141,4 +142,5 @@ npm run build
 - [Database fundamentals](docs/database-fundamentals.md)
 - [Book and note data model](docs/data-model.md)
 - [Book and note API design](docs/api-design.md)
+- [Frontend architecture](docs/frontend-architecture.md)
 - [ADR 001: modular monolith](docs/decisions/001-modular-monolith.md)
