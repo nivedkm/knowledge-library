@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.infrastructure.database.models import Book, Note
+from app.infrastructure.database.models import Book, Note, NoteChunk
 from app.infrastructure.repositories.catalog import CatalogRepository
 
 
@@ -72,6 +72,39 @@ def test_deleting_a_book_cascades_to_its_notes(
         select(Note).where(Note.id == note_id),
     )
     assert remaining_note is None
+
+
+def test_repository_creates_and_reads_note_chunks(
+    database_session: Session,
+) -> None:
+    repository = CatalogRepository(database_session)
+    book = repository.add_book(
+        Book(
+            title="Designing Data-Intensive Applications",
+            author="Martin Kleppmann",
+        ),
+    )
+    note = repository.add_note(
+        Note(
+            book_id=book.id,
+            body="Indexes speed up reads by storing extra structure.",
+        ),
+    )
+    chunk = repository.add_note_chunk(
+        NoteChunk(
+            note_id=note.id,
+            chunk_index=0,
+            content="Indexes speed up reads by storing extra structure.",
+            embedding=[0.1] * 384,
+            embedding_model="sentence-transformers/all-MiniLM-L6-v2",
+        ),
+    )
+
+    loaded_chunks = repository.list_chunks_for_note(note.id)
+
+    assert loaded_chunks == [chunk]
+    assert loaded_chunks[0].note is note
+    assert loaded_chunks[0].embedding_model == "sentence-transformers/all-MiniLM-L6-v2"
 
 
 def test_database_rejects_blank_required_text(

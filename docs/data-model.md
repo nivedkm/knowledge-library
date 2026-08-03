@@ -21,6 +21,18 @@ notes
 ├── source_location (optional)
 ├── created_at
 └── updated_at
+       │
+       │ one note/quote can produce many searchable chunks
+       ▼
+note_chunks
+├── id (UUID primary key)
+├── note_id (foreign key)
+├── chunk_index
+├── content
+├── embedding (vector(384), optional for now)
+├── embedding_model (optional for now)
+├── created_at
+└── updated_at
 ```
 
 ## Important invariants
@@ -33,6 +45,10 @@ An invariant is a rule that must always remain true:
 - Every entry is classified as either a `note` or `quote`.
 - Every note belongs to an existing book.
 - Deleting a book deletes its notes.
+- Every chunk belongs to an existing note.
+- Deleting a note deletes its chunks.
+- Chunk positions are unique within one note.
+- A chunk embedding and its embedding model are stored together or not at all.
 - Optional text is either meaningful text or `NULL`, not an empty string.
 
 These rules are PostgreSQL constraints, not only Python validation. The database
@@ -43,6 +59,24 @@ is the final guardian of its own integrity.
 The `kind` field changes presentation, not knowledge access. Future chunking and
 semantic retrieval will use the `body` of both notes and quotes. A question about
 a book can therefore retrieve either form of captured knowledge.
+
+## Why retrieval uses chunks
+
+The app stores full notes and quotes because that is pleasant for humans. Search
+works better on smaller passages, so retrieval uses `note_chunks`.
+
+```text
+human storage:   book -> note/quote
+search storage:  note/quote -> chunk -> embedding
+```
+
+The first embedding model is `sentence-transformers/all-MiniLM-L6-v2`, which
+creates 384-dimensional vectors. That is why `note_chunks.embedding` is
+`vector(384)`.
+
+The embedding is optional in this milestone. This lets us create the retrieval
+table before building the background process that calculates embeddings. Later,
+semantic search will only consider chunks whose embedding is present.
 
 ## Why there is no `last_activity_at`
 

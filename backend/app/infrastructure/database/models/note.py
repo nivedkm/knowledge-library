@@ -9,6 +9,7 @@ from app.infrastructure.database.base import Base
 
 if TYPE_CHECKING:
     from app.infrastructure.database.models.book import Book
+    from app.infrastructure.database.models.note_chunk import NoteChunk
 
 NoteKind = Literal["note", "quote"]
 
@@ -63,3 +64,8 @@ class Note(Base):
     )
 
     book: Mapped["Book"] = relationship(back_populates="notes")
+    chunks: Mapped[list["NoteChunk"]] = relationship(
+        back_populates="note",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )

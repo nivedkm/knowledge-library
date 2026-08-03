@@ -24,6 +24,21 @@ The backend returns:
 The frontend turns that machine-friendly response into a human-friendly status
 message.
 
+The current catalog and retrieval data path now looks like this:
+
+```text
+React UI
+  -> FastAPI
+      -> Catalog service
+          -> PostgreSQL
+              -> books
+              -> notes
+              -> note_chunks
+```
+
+Notes and quotes are the human-facing entries. Chunks are the retrieval-facing
+entries that will receive embeddings and later power semantic search.
+
 ## Why this comes before the database
 
 If we introduced React, FastAPI, PostgreSQL, SQLAlchemy, and pgvector together,
@@ -64,4 +79,3 @@ Configuration is read from environment variables:
 
 The committed `.env.example` documents allowed settings. The real `.env` file
 is ignored because environment files may eventually contain secrets.
-

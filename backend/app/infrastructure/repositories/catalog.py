@@ -4,7 +4,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.infrastructure.database.models import Book, Note
+from app.infrastructure.database.models import Book, Note, NoteChunk
 
 
 class CatalogRepository:
@@ -81,6 +81,11 @@ class CatalogRepository:
         self._session.flush()
         return note
 
+    def add_note_chunk(self, chunk: NoteChunk) -> NoteChunk:
+        self._session.add(chunk)
+        self._session.flush()
+        return chunk
+
     def get_note(self, note_id: UUID) -> Note | None:
         return self._session.get(Note, note_id)
 
@@ -97,6 +102,14 @@ class CatalogRepository:
             .order_by(Note.created_at, Note.id)
             .limit(limit)
             .offset(offset)
+        )
+        return list(self._session.scalars(statement))
+
+    def list_chunks_for_note(self, note_id: UUID) -> list[NoteChunk]:
+        statement = (
+            select(NoteChunk)
+            .where(NoteChunk.note_id == note_id)
+            .order_by(NoteChunk.chunk_index, NoteChunk.id)
         )
         return list(self._session.scalars(statement))
 
