@@ -1,30 +1,25 @@
-# Milestone 1 architecture
+# Architecture
 
-## What we are building
+## Current Shape
 
-Milestone 1 creates two small applications:
+WisdomAI is a local-first web app with a React frontend, a FastAPI backend, and
+PostgreSQL as the source of truth.
 
 ```text
-┌──────────────────────────┐       HTTP/JSON       ┌──────────────────────────┐
-│ React + TypeScript       │ ────────────────────> │ FastAPI                  │
-│ User interface           │                       │ /api/v1/health           │
-│ localhost:5173           │ <──────────────────── │ localhost:8000           │
-└──────────────────────────┘    status response    └──────────────────────────┘
+React + TypeScript
+localhost:5173
+       |
+       | HTTP/JSON
+       v
+FastAPI
+localhost:8000
+       |
+       v
+PostgreSQL + pgvector
+localhost:5432
 ```
 
-The backend returns:
-
-```json
-{
-  "status": "ok",
-  "service": "wisdom-api"
-}
-```
-
-The frontend turns that machine-friendly response into a human-friendly status
-message.
-
-The current catalog and retrieval data path now looks like this:
+The catalog and retrieval data path currently looks like this:
 
 ```text
 React UI
@@ -39,35 +34,36 @@ React UI
 Notes and quotes are the human-facing entries. Chunks are the retrieval-facing
 entries that will receive embeddings and later power semantic search.
 
-## Why this comes before the database
+## Why We Built In Layers
 
-If we introduced React, FastAPI, PostgreSQL, SQLAlchemy, and pgvector together,
-an error could come from any of five places. This foundation gives us a known
-working path from browser to backend. PostgreSQL becomes the only new variable
-in the next milestone.
+Each milestone adds one major moving part: API, database, data model, frontend,
+then retrieval storage. That makes failures easier to understand and keeps the
+project interview-friendly: every layer has a clear reason to exist.
 
 ## Boundaries
 
 - `api/` understands HTTP concepts such as routes and status codes.
+- `application/` coordinates use cases and transaction boundaries.
+- `infrastructure/database/` defines SQLAlchemy models and sessions.
+- `infrastructure/repositories/` owns database queries.
 - `config/` contains values that may differ between environments.
 - `schemas/` describes data crossing the API boundary.
 - The React `api/` directory owns communication with the backend.
 - React components display state but do not construct backend URLs themselves.
 
-Later milestones will add application, domain, and infrastructure packages when
-real use cases exist. Empty architectural layers would create complexity without
-providing separation.
+We are keeping this as a modular monolith: one backend process with clear
+internal boundaries.
 
-## Request lifecycle
+## Current Request Lifecycle
 
 ```text
-1. React mounts
-2. React calls fetchHealth()
-3. The browser sends GET /api/v1/health
-4. FastAPI matches the route
-5. FastAPI validates the response against HealthResponse
-6. The browser receives JSON
-7. React displays connected or unavailable
+1. React submits a book/note/quote request
+2. FastAPI validates it with Pydantic
+3. CatalogService coordinates the use case
+4. CatalogRepository runs SQLAlchemy queries
+5. PostgreSQL enforces constraints and stores data
+6. FastAPI returns typed JSON
+7. React refreshes the affected screen state
 ```
 
 ## Configuration

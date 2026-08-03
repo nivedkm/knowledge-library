@@ -10,13 +10,13 @@ App
 ```
 
 `BooksPage` owns the list of books and the create-book form.
-`BookDetailPage` owns one book, its notes, and their editing forms.
+`BookDetailPage` owns one book, its notes/quotes, and their editing forms.
 
 ## State categories
 
 The interface has two kinds of state:
 
-- **Server state**: books and notes loaded from FastAPI.
+- **Server state**: books, notes, and quotes loaded from FastAPI.
 - **UI state**: form text, editing mode, loading flags, and displayed errors.
 
 PostgreSQL remains the source of truth. After a mutation succeeds, the page
@@ -59,6 +59,9 @@ idle → loading/saving → success
 Destructive actions require confirmation. Empty libraries and empty note lists
 have dedicated guidance rather than appearing broken.
 
+The note composer has a note/quote switch. The switch changes labels and visual
+style only; both entry types use the same backend note API.
+
 ## Responsive design
 
 Large screens use:
@@ -68,4 +71,3 @@ Large screens use:
 
 Smaller screens collapse both layouts to one column. Form controls and actions
 remain keyboard accessible, and focus indicators are visible.
-

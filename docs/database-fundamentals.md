@@ -26,7 +26,9 @@ These terms describe different levels:
 PostgreSQL server
 └── wisdom database
     └── public schema
-        └── future books and notes tables
+        ├── books
+        ├── notes
+        └── note_chunks
 ```
 
 - The **server** is the running PostgreSQL program.
@@ -58,13 +60,14 @@ A transaction groups operations into one all-or-nothing unit:
 
 ```text
 BEGIN
-  create note
+  create note or quote
   create its chunks
 COMMIT
 ```
 
-If creating the chunks fails, `ROLLBACK` prevents a half-finished result. We will
-use this behavior when books and notes are introduced.
+If creating chunks fails, `ROLLBACK` prevents a half-finished result. This is why
+the application service owns commits instead of each repository method
+committing independently.
 
 ## Why Alembic exists
 
@@ -72,14 +75,11 @@ SQLAlchemy models describe what the Python application expects now. Alembic
 migrations record the ordered steps used to change a real database:
 
 ```text
-baseline → add books → add notes → add vectors
+baseline → add books and notes → add note kind → add note chunks
 ```
 
 This history lets a new developer create the schema and lets an existing
 installation upgrade without deleting its data.
-
-The baseline migration intentionally creates no application table. Milestone 3
-will introduce books and notes after their constraints are designed.
 
 ## Container storage
 
@@ -92,4 +92,3 @@ Container (replaceable) ──> Named volume (persistent)
 
 Stopping or recreating the container keeps the volume. Deleting the volume
 deletes the database.
-
