@@ -78,6 +78,7 @@ def create_note(
         title=payload.title,
         body=payload.body,
         source_location=payload.source_location,
+        kind=payload.kind,
     )
     return NoteResponse.from_note(note)
 

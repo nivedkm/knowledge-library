@@ -14,11 +14,14 @@ export interface Note {
   id: string;
   book_id: string;
   title: string | null;
+  kind: NoteKind;
   body: string;
   source_location: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export type NoteKind = "note" | "quote";
 
 export interface BookInput {
   title: string;
@@ -27,6 +30,7 @@ export interface BookInput {
 
 export interface NoteInput {
   title?: string | null;
+  kind?: NoteKind;
   body: string;
   source_location?: string | null;
 }
@@ -85,4 +89,3 @@ export function updateNote(noteId: string, input: NoteUpdate): Promise<Note> {
 export function deleteNote(noteId: string): Promise<void> {
   return apiRequest<void>(`/notes/${noteId}`, { method: "DELETE" });
 }
-

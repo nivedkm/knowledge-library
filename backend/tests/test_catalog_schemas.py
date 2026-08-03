@@ -46,3 +46,8 @@ def test_note_patch_allows_clearing_optional_fields() -> None:
 def test_note_patch_rejects_a_null_body() -> None:
     with pytest.raises(ValidationError):
         NoteUpdate(body=None)
+
+
+def test_note_kind_defaults_to_note_and_accepts_quote() -> None:
+    assert NoteCreate(body="A thought").kind == "note"
+    assert NoteCreate(body="Exact words", kind="quote").kind == "quote"

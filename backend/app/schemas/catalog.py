@@ -5,7 +5,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, StringConstraints, model_validator
 
 from app.application.catalog.service import BookOverview
-from app.infrastructure.database.models import Note
+from app.infrastructure.database.models import Note, NoteKind
 
 ShortText = Annotated[
     str,
@@ -64,12 +64,14 @@ class BookResponse(BaseModel):
 
 class NoteCreate(BaseModel):
     title: ShortText | None = None
+    kind: NoteKind = "note"
     body: NoteBody
     source_location: LocationText | None = None
 
 
 class NoteUpdate(BaseModel):
     title: ShortText | None = None
+    kind: NoteKind | None = None
     body: NoteBody | None = None
     source_location: LocationText | None = None
 
@@ -91,6 +93,7 @@ class NoteResponse(BaseModel):
     id: UUID
     book_id: UUID
     title: str | None
+    kind: NoteKind
     body: str
     source_location: str | None
     created_at: datetime

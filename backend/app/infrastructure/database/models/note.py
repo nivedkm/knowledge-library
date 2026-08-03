@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 from uuid import UUID, uuid4
 
 from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String, Text, func
@@ -9,6 +9,8 @@ from app.infrastructure.database.base import Base
 
 if TYPE_CHECKING:
     from app.infrastructure.database.models.book import Book
+
+NoteKind = Literal["note", "quote"]
 
 
 class Note(Base):
@@ -28,6 +30,10 @@ class Note(Base):
             "source_location IS NULL OR char_length(btrim(source_location)) > 0",
             name="ck_notes_source_location_not_blank",
         ),
+        CheckConstraint(
+            "kind IN ('note', 'quote')",
+            name="ck_notes_kind_is_valid",
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -36,6 +42,11 @@ class Note(Base):
         index=True,
     )
     title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    kind: Mapped[NoteKind] = mapped_column(
+        String(10),
+        default="note",
+        server_default="note",
+    )
     body: Mapped[str] = mapped_column(Text)
     source_location: Mapped[str | None] = mapped_column(
         String(100),

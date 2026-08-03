@@ -8,6 +8,7 @@ import {
 import {
   type Book,
   type Note,
+  type NoteKind,
   createNote,
   deleteBook,
   deleteNote,
@@ -239,6 +240,7 @@ function BookSettings({
 
 function NoteComposer({ bookId, onCreated }: { bookId: string; onCreated: () => void }) {
   const [title, setTitle] = useState("");
+  const [kind, setKind] = useState<NoteKind>("note");
   const [body, setBody] = useState("");
   const [sourceLocation, setSourceLocation] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -251,6 +253,7 @@ function NoteComposer({ bookId, onCreated }: { bookId: string; onCreated: () => 
     try {
       await createNote(bookId, {
         title: title || null,
+        kind,
         body,
         source_location: sourceLocation || null,
       });
@@ -268,16 +271,17 @@ function NoteComposer({ bookId, onCreated }: { bookId: string; onCreated: () => 
   return (
     <form className="note-composer" onSubmit={handleSubmit}>
       <div>
-        <p className="form-kicker">Capture an idea</p>
-        <h2>New note</h2>
+        <p className="form-kicker">Capture what matters</p>
+        <h2>New {kind}</h2>
       </div>
+      <EntryKindSwitch kind={kind} onChange={setKind} />
       <label>
         Heading <span>optional</span>
         <input maxLength={255} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="What is this idea about?" />
       </label>
       <label>
-        Your note
-        <textarea required maxLength={100000} rows={9} value={body} onChange={(event) => setBody(event.target.value)} placeholder="Write the idea in your own words…" />
+        {kind === "quote" ? "Quote" : "Your note"}
+        <textarea required maxLength={100000} rows={9} value={body} onChange={(event) => setBody(event.target.value)} placeholder={kind === "quote" ? "Copy the passage exactly…" : "Write the idea in your own words…"} />
       </label>
       <label>
         Source <span>optional</span>
@@ -285,7 +289,7 @@ function NoteComposer({ bookId, onCreated }: { bookId: string; onCreated: () => 
       </label>
       {error === null ? null : <p className="field-error" role="alert">{error}</p>}
       <button className="button button--primary" disabled={isSaving}>
-        {isSaving ? "Saving…" : "Save note"}
+        {isSaving ? "Saving…" : `Save ${kind}`}
       </button>
     </form>
   );
@@ -294,6 +298,7 @@ function NoteComposer({ bookId, onCreated }: { bookId: string; onCreated: () => 
 function NoteCard({ note, onChanged }: { note: Note; onChanged: () => void }) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(note.title ?? "");
+  const [kind, setKind] = useState<NoteKind>(note.kind);
   const [body, setBody] = useState(note.body);
   const [sourceLocation, setSourceLocation] = useState(note.source_location ?? "");
   const [isSaving, setIsSaving] = useState(false);
@@ -306,6 +311,7 @@ function NoteCard({ note, onChanged }: { note: Note; onChanged: () => void }) {
     try {
       await updateNote(note.id, {
         title: title || null,
+        kind,
         body,
         source_location: sourceLocation || null,
       });
@@ -341,15 +347,16 @@ function NoteCard({ note, onChanged }: { note: Note; onChanged: () => void }) {
 
   if (isEditing) {
     return (
-      <form className="note-card note-card--editing" onSubmit={handleUpdate}>
+      <form className={`note-card note-card--editing note-card--${kind}`} onSubmit={handleUpdate}>
         <label>
           Heading
           <input maxLength={255} value={title} onChange={(event) => setTitle(event.target.value)} />
         </label>
         <label>
-          Note
+          {kind === "quote" ? "Quote" : "Note"}
           <textarea required maxLength={100000} rows={7} value={body} onChange={(event) => setBody(event.target.value)} />
         </label>
+        <EntryKindSwitch kind={kind} onChange={setKind} />
         <label>
           Source
           <input maxLength={100} value={sourceLocation} onChange={(event) => setSourceLocation(event.target.value)} />
@@ -368,18 +375,52 @@ function NoteCard({ note, onChanged }: { note: Note; onChanged: () => void }) {
   }
 
   return (
-    <article className="note-card">
+    <article className={`note-card note-card--${note.kind}`}>
       <div className="note-card__topline">
+        <span className="entry-kind">{note.kind}</span>
         <span>{note.source_location ?? "General note"}</span>
         <time dateTime={note.updated_at}>{formatDate(note.updated_at)}</time>
       </div>
       {note.title === null ? null : <h3>{note.title}</h3>}
-      <p className="note-body">{note.body}</p>
+      {note.kind === "quote" ? (
+        <blockquote className="quote-body">{note.body}</blockquote>
+      ) : (
+        <p className="note-body">{note.body}</p>
+      )}
       {error === null ? null : <p className="field-error" role="alert">{error}</p>}
       <div className="note-actions">
         <button type="button" onClick={() => setIsEditing(true)}>Edit</button>
         <button type="button" onClick={() => void handleDelete()}>Delete</button>
       </div>
     </article>
+  );
+}
+
+function EntryKindSwitch({
+  kind,
+  onChange,
+}: {
+  kind: NoteKind;
+  onChange: (kind: NoteKind) => void;
+}) {
+  return (
+    <div className="kind-switch" role="group" aria-label="Entry type">
+      <button
+        className={kind === "note" ? "kind-switch__option is-selected" : "kind-switch__option"}
+        type="button"
+        aria-pressed={kind === "note"}
+        onClick={() => onChange("note")}
+      >
+        Note
+      </button>
+      <button
+        className={kind === "quote" ? "kind-switch__option is-selected" : "kind-switch__option"}
+        type="button"
+        aria-pressed={kind === "quote"}
+        onClick={() => onChange("quote")}
+      >
+        Quote
+      </button>
+    </div>
   );
 }

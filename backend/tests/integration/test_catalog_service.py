@@ -20,6 +20,7 @@ def test_service_manages_a_book_and_its_notes(
         title="Retrieval practice",
         body="Recalling knowledge strengthens later recall.",
         source_location="Chapter 2",
+        kind="quote",
     )
 
     loaded_book = service.get_book(created_book.book.id)
@@ -32,12 +33,14 @@ def test_service_manages_a_book_and_its_notes(
     assert loaded_book.note_count == 1
     assert loaded_book.last_activity_at >= loaded_book.book.updated_at
     assert loaded_notes == [note]
+    assert note.kind == "quote"
 
     updated_note = service.update_note(
         note.id,
-        changes={"source_location": None},
+        changes={"source_location": None, "kind": "note"},
     )
     assert updated_note.source_location is None
+    assert updated_note.kind == "note"
 
     service.delete_note(note.id)
     assert service.get_book(created_book.book.id).note_count == 0

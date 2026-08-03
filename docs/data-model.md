@@ -16,6 +16,7 @@ notes
 ├── id (UUID primary key)
 ├── book_id (foreign key)
 ├── title (optional)
+├── kind (`note` or `quote`)
 ├── body
 ├── source_location (optional)
 ├── created_at
@@ -29,12 +30,19 @@ An invariant is a rule that must always remain true:
 - A book title cannot be empty or whitespace.
 - A book author cannot be empty or whitespace.
 - A note body cannot be empty or whitespace.
+- Every entry is classified as either a `note` or `quote`.
 - Every note belongs to an existing book.
 - Deleting a book deletes its notes.
 - Optional text is either meaningful text or `NULL`, not an empty string.
 
 These rules are PostgreSQL constraints, not only Python validation. The database
 is the final guardian of its own integrity.
+
+## Notes and quotes in retrieval
+
+The `kind` field changes presentation, not knowledge access. Future chunking and
+semantic retrieval will use the `body` of both notes and quotes. A question about
+a book can therefore retrieve either form of captured knowledge.
 
 ## Why there is no `last_activity_at`
 
@@ -74,4 +82,3 @@ Application use case
 
 The application layer owns the transaction so related operations remain
 all-or-nothing.
-

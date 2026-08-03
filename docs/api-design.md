@@ -63,6 +63,10 @@ An empty patch is rejected because it expresses no operation.
 Optional note fields can explicitly be cleared with `null`. Required book fields
 and the note body cannot be set to `null`.
 
+Each note request and response includes `kind`, either `note` or `quote`. It
+defaults to `note`. The distinction lets the interface render quotes differently
+while future retrieval treats both bodies as searchable book knowledge.
+
 ## Book activity
 
 Book responses contain:
@@ -78,4 +82,3 @@ and its latest note update timestamp. It is not duplicated in the database.
 The application service raises a technology-neutral `ResourceNotFoundError`.
 FastAPI converts it into a `404` response. This prevents HTTP concerns from
 leaking into the service and repository layers.
-

@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.application.errors import ResourceNotFoundError
-from app.infrastructure.database.models import Book, Note
+from app.infrastructure.database.models import Book, Note, NoteKind
 from app.infrastructure.repositories.catalog import CatalogRepository
 
 
@@ -85,6 +85,7 @@ class CatalogService:
         body: str,
         title: str | None,
         source_location: str | None,
+        kind: NoteKind = "note",
     ) -> Note:
         self._require_book(book_id)
         note = self._repository.add_note(
@@ -93,6 +94,7 @@ class CatalogService:
                 title=title,
                 body=body,
                 source_location=source_location,
+                kind=kind,
             ),
         )
         self._commit()
