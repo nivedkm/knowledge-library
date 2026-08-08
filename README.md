@@ -194,7 +194,7 @@ If you'd like, I can also:
   freshly published container
 - Implement provider-specific secrets and a full auto-deploy pipeline
 
-Render quick setup (what I added):
+Render quick setup (requires a card on Render, so skip this if you do not want to add one):
 
 1. Create a Render web service (select "Docker" and either point to the
    repository or choose to pull the image from GitHub Container Registry).
@@ -211,3 +211,30 @@ Notes:
   Settings → Secrets. After that, pushes to `main` will auto-deploy.
 - If you'd rather use Fly or another host, I can add provider-specific files
   instead (e.g., `fly.toml` and an Actions job that runs `flyctl deploy`).
+
+## No-Card Deployment
+
+If you do not want to add a card, the practical option is to run the app on
+your own PC and expose it with a free tunnel. This gives you a public URL for
+your phone and other devices, but your PC must stay on.
+
+```bash
+# 1) Start the local database
+docker-compose up -d database
+
+# 2) Build the app image
+docker build -t wisdomai .
+
+# 3) Run it on the host network so it can reach localhost:5432
+docker run --rm --network host \
+   -e WISDOM_DATABASE_URL=postgresql+psycopg://wisdom:wisdom@127.0.0.1:5432/wisdom \
+   wisdomai
+
+# 4) In another terminal, install and run a free tunnel
+npm install -g localtunnel
+lt --port 8000
+```
+
+If you want the tunnel to be more permanent, the next step is usually a free
+Cloudflare Tunnel or a card-verified cloud host. For a truly persistent public
+deployment with no card, the options are limited.
