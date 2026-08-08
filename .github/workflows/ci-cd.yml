@@ -42,7 +42,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: knowledge_library_test
         ports:
-          - 5432:5432
+          - 5433:5432
         options: >-
           --health-cmd="pg_isready -U postgres -d knowledge_library_test"
           --health-interval=10s
@@ -64,7 +64,7 @@ jobs:
           uv sync --frozen --group dev
       - name: Run tests
         env:
-          WISDOM_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/knowledge_library_test
+          WISDOM_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5433/knowledge_library_test
         run: |
           cd backend
           uv run pytest -q
