@@ -24,7 +24,9 @@ COPY README.md /app/README.md
 RUN uv sync --frozen --no-dev
 
 # Pre-download the HuggingFace AI model into the Docker image
-RUN uv run python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+ENV HF_HOME=/app/backend/.cache/huggingface
+RUN uv run python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')" && \
+    chmod -R 777 /app/backend/.cache
 
 COPY --from=frontend-build /app/frontend/dist ./app/static
 
