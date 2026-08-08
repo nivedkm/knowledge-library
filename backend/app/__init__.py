@@ -1,1 +1,1 @@
-"""WisdomAI backend application."""
+"""Personal Knowledge Library backend application."""

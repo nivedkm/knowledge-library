@@ -90,8 +90,7 @@ export function BooksPage() {
             remembered.
           </h1>
           <p className="hero-copy">
-            Save the ideas worth keeping. Search and grounded answers arrive in
-            later milestones.
+            Add books, write notes, and retrieve them later using what you remember.
           </p>
         </div>
 
@@ -107,7 +106,7 @@ export function BooksPage() {
               maxLength={255}
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="e.g. Thinking in Systems"
+              placeholder="e.g. The Old Man and the Sea"
             />
           </label>
           <label>
@@ -117,7 +116,7 @@ export function BooksPage() {
               maxLength={255}
               value={author}
               onChange={(event) => setAuthor(event.target.value)}
-              placeholder="e.g. Donella Meadows"
+              placeholder="e.g. Ernest Hemingway"
             />
           </label>
           <button className="button button--primary" disabled={isCreating}>
@@ -275,22 +274,23 @@ function KnowledgeSearch() {
 
         <form className="search-panel__form" onSubmit={handleSubmit}>
           <label className="search-panel__field">
-            Question
-            <input
-              value={question}
-              onChange={(event) => setQuestion(event.target.value)}
-              placeholder="What did I note about retrieval practice?"
-            />
+            <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+              <input
+                value={question}
+                onChange={(event) => setQuestion(event.target.value)}
+                placeholder="What did I note about habit formation?"
+                style={{ flex: 1 }}
+              />
+              <button
+                className="button button--primary"
+                type="submit"
+                disabled={isSearching}
+                style={{ flexShrink: 0 }}
+              >
+                {isSearching ? "Searching…" : "Search notes"}
+              </button>
+            </div>
           </label>
-          <div className="button-row">
-            <button
-              className="button button--primary"
-              type="submit"
-              disabled={isSearching}
-            >
-              {isSearching ? "Searching…" : "Search notes"}
-            </button>
-          </div>
         </form>
 
         {error === null ? null : (

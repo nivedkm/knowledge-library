@@ -23,9 +23,12 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="app">
       <header className="site-header">
-        <Link className="brand" to="/" aria-label="WisdomAI home">
-          <span className="brand__mark">W</span>
-          <span>WisdomAI</span>
+        <Link className="brand" to="/" aria-label="Personal Knowledge Library home">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: "4px" }}>
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
+          <span>Personal Knowledge Library</span>
         </Link>
         <div className="site-header__meta">
           <button
