@@ -42,9 +42,9 @@ jobs:
         ports:
           - 5432:5432
         env:
-          POSTGRES_DB: wisdom
-          POSTGRES_USER: wisdom
-          POSTGRES_PASSWORD: wisdom
+          POSTGRES_DB: knowledge-library
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: nGR9bMPsnX4dR
         options: >-
           --health-cmd "pg_isready -U wisdom -d wisdom"
           --health-interval 10s
