@@ -35,7 +35,21 @@ jobs:
     name: Backend tests
     runs-on: ubuntu-latest
     env:
-    WISDOM_DATABASE_URL: ${{ secrets.WISDOM_DATABASE_URL }}
+      WISDOM_DATABASE_URL: postgresql+psycopg://wisdom:wisdom@localhost:5432/wisdom
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.2-pg17
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: wisdom
+          POSTGRES_USER: wisdom
+          POSTGRES_PASSWORD: wisdom
+        options: >-
+          --health-cmd "pg_isready -U wisdom -d wisdom"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v5
       - name: Setup Python
@@ -46,10 +60,20 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install uv
+      - name: Wait for Postgres
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          export PGPASSWORD=wisdom
+          until pg_isready -h localhost -p 5432 -U wisdom; do sleep 1; done
       - name: Install backend deps
         run: |
           cd backend
           uv sync --frozen --group dev
+      - name: Run DB migrations
+        run: |
+          cd backend
+          uv run alembic upgrade head
       - name: Run tests
         run: |
           cd backend
