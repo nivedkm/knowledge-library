@@ -12,6 +12,9 @@ settings = get_settings()
 engine = create_engine(
     settings.database_url,
     pool_pre_ping=True,
+    # Supabase connection poolers do not support prepared statements, and require SSL
+    execution_options={"psycopg_prepare_threshold": None},
+    connect_args={"sslmode": "prefer"},
 )
 
 # Each web request receives its own short-lived Session from this factory.
