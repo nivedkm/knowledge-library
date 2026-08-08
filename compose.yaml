@@ -15,7 +15,7 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - pg_isready -U ${POSTGRES_USER:-wisdom} -d ${POSTGRES_DB:-wisdom}
+        - pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-knowledge-library}
       interval: 5s
       timeout: 5s
       retries: 10

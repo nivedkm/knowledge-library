@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     api_title: str = "WisdomAI API"
     environment: str = "development"
     cors_origins: list[str] = ["http://localhost:5173"]
-    database_url: str = "postgresql+psycopg://wisdom:wisdom@localhost:5432/wisdom"
+    database_url: str = "postgresql+psycopg://postgres:nGR9bMPsnX4dR@db.fukleulfjsvmlzkxthxi.supabase.co:5432/postgres"
 
 
 @lru_cache

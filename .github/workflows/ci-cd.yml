@@ -35,7 +35,7 @@ jobs:
     name: Backend tests
     runs-on: ubuntu-latest
     env:
-      WISDOM_DATABASE_URL: postgresql+psycopg://wisdom:wisdom@localhost:5432/wisdom
+      WISDOM_DATABASE_URL: postgresql+psycopg://postgres:nGR9bMPsnX4dR@db.fukleulfjsvmlzkxthxi.supabase.co:5432/postgres
     services:
       postgres:
         image: pgvector/pgvector:0.8.2-pg17
