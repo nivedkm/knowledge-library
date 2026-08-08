@@ -1,4 +1,7 @@
-from fastapi import FastAPI, Request, status
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -23,6 +26,21 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     application.include_router(api_router, prefix="/api/v1")
+
+    static_dir = Path(__file__).resolve().parent / "static"
+
+    if static_dir.is_dir():
+
+        @application.get("/{requested_path:path}", include_in_schema=False)
+        async def serve_frontend(requested_path: str) -> FileResponse:
+            if requested_path.startswith("api/"):
+                raise HTTPException(status_code=404)
+
+            requested_file = static_dir / requested_path
+            if requested_file.is_file():
+                return FileResponse(requested_file)
+
+            return FileResponse(static_dir / "index.html")
 
     @application.exception_handler(ResourceNotFoundError)
     async def handle_not_found(

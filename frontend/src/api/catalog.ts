@@ -22,6 +22,28 @@ export interface Note {
 }
 
 export type NoteKind = "note" | "quote";
+export type SearchKindFilter = "all" | "note" | "quote";
+
+export interface SearchResult {
+  note_id: string;
+  book_id: string;
+  note_kind: NoteKind;
+  note_title: string | null;
+  book_title: string;
+  book_author: string;
+  source_location: string | null;
+  excerpt: string;
+  matched_chunks: string[];
+  semantic_distance: number;
+  keyword_rank: number;
+  score: number;
+}
+
+export interface SearchResponse {
+  question: string;
+  answer: string;
+  results: SearchResult[];
+}
 
 export interface BookInput {
   title: string;
@@ -88,4 +110,14 @@ export function updateNote(noteId: string, input: NoteUpdate): Promise<Note> {
 
 export function deleteNote(noteId: string): Promise<void> {
   return apiRequest<void>(`/notes/${noteId}`, { method: "DELETE" });
+}
+
+export function searchNotes(
+  question: string,
+  kind: SearchKindFilter = "all",
+): Promise<SearchResponse> {
+  return apiRequest<SearchResponse>("/search", {
+    method: "POST",
+    body: JSON.stringify({ question, kind }),
+  });
 }

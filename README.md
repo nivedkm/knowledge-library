@@ -99,6 +99,26 @@ npm run dev
 
 Then open `http://localhost:5173`.
 
+## Production container
+
+This repo now includes a single Docker image that builds the frontend and
+backend together and serves the app from one URL. The frontend talks to the
+API on the same origin, so the same deployment works on desktop and phone.
+
+Build and run it locally:
+
+```bash
+docker build -t wisdomai .
+docker run --rm -p 8000:8000 \
+   -e WISDOM_DATABASE_URL=postgresql+psycopg://wisdom:wisdom@host.docker.internal:5432/wisdom \
+   wisdomai
+```
+
+In production, point `WISDOM_DATABASE_URL` at your managed PostgreSQL
+instance and expose port `8000` through your hosting platform. Any GitHub-based
+deploy pipeline can rebuild this image on push, which gives you automatic app
+updates when you merge changes.
+
 Useful backend pages:
 
 - API health: `http://localhost:8000/api/v1/health`
@@ -144,3 +164,50 @@ npm run build
 - [Book and note API design](docs/api-design.md)
 - [Frontend architecture](docs/frontend-architecture.md)
 - [ADR 001: modular monolith](docs/decisions/001-modular-monolith.md)
+
+## CI / CD
+
+This repository includes a GitHub Actions workflow that builds the frontend,
+runs backend tests, and builds + publishes a Docker image to GitHub Container
+Registry (GHCR) on pushes to `main`.
+
+What to do to enable automatic publish:
+
+- Ensure Actions permissions allow `packages: write` for the workflow.
+- Optionally create a hosting service (Render, Fly, etc.) that pulls the built
+  image from `ghcr.io/<OWNER>/<REPO>` or that builds the repository directly
+  from the Dockerfile.
+
+Quick checklist:
+
+```bash
+# 1) Enable GitHub Actions for this repo
+# 2) (Optional) Create service on Render/Fly and point it at ghcr.io or repo
+# 3) Set production `WISDOM_DATABASE_URL` in your host's environment/secrets
+# 4) Merge to `main` to trigger the workflow and publish the image
+```
+
+If you'd like, I can also:
+
+- Add a provider-specific workflow for Render or Fly that triggers a deploy
+- Add a GitHub Actions job that runs a lightweight smoke test against the
+  freshly published container
+- Implement provider-specific secrets and a full auto-deploy pipeline
+
+Render quick setup (what I added):
+
+1. Create a Render web service (select "Docker" and either point to the
+   repository or choose to pull the image from GitHub Container Registry).
+2. Copy the service ID from Render and add two repository secrets:
+   - `RENDER_API_KEY` (a Render API key with deploy permission)
+   - `RENDER_SERVICE_ID` (the service ID for your app)
+3. Merge to `main` — the CI workflow builds and publishes the image, then
+   `.github/workflows/deploy-to-render.yml` triggers a deploy on Render.
+
+Notes:
+
+- I cannot create the Render service or set your repository secrets for you, so
+  you'll need to provision the service and add the two secrets in the repo's
+  Settings → Secrets. After that, pushes to `main` will auto-deploy.
+- If you'd rather use Fly or another host, I can add provider-specific files
+  instead (e.g., `fly.toml` and an Actions job that runs `flyctl deploy`).

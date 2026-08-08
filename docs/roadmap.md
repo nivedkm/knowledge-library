@@ -16,14 +16,12 @@ The app is usable as a local book notes manager. Notes and quotes are stored in
 PostgreSQL. Quotes render differently in the UI, but retrieval will treat notes
 and quotes as the same kind of knowledge.
 
-The database is ready to store embeddings, but the app does not generate or
-search embeddings yet.
+The database now stores searchable note chunks and embeddings, and the app can
+rank note chunks with a hybrid semantic plus keyword search endpoint. The UI can
+ask questions of the library and show grounded matches.
 
 ## Next Milestones
 
-1. Build chunking logic for note/quote bodies.
-2. Generate embeddings locally with `sentence-transformers/all-MiniLM-L6-v2`.
-3. Add semantic search over `note_chunks`.
-4. Add question answering from retrieved chunks only.
-5. Add hybrid retrieval with keyword search plus vector search.
-6. Add local LLM generation with `llama.cpp`.
+1. Improve search result presentation with richer source previews and note/book filters.
+2. Add answer generation beyond grounded excerpts when a local LLM is available.
+3. Expand evaluation coverage for ranking quality and grounding precision.

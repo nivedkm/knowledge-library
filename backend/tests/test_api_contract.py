@@ -9,6 +9,7 @@ def test_openapi_exposes_catalog_operations() -> None:
         "/api/v1/books/{book_id}": {"get", "patch", "delete"},
         "/api/v1/books/{book_id}/notes": {"get", "post"},
         "/api/v1/notes/{note_id}": {"get", "patch", "delete"},
+        "/api/v1/search": {"post"},
     }
 
     for path, methods in expected_operations.items():

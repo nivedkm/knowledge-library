@@ -6,7 +6,13 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.application.errors import ResourceNotFoundError
-from app.infrastructure.database.models import Book, Note, NoteKind
+from app.application.search.chunking import split_note_body
+from app.application.search.embeddings import (
+    DEFAULT_EMBEDDING_MODEL,
+    EmbeddingService,
+    SentenceTransformerEmbeddingService,
+)
+from app.infrastructure.database.models import Book, Note, NoteChunk, NoteKind
 from app.infrastructure.repositories.catalog import CatalogRepository
 
 
@@ -22,9 +28,15 @@ class BookOverview:
 class CatalogService:
     """Coordinate catalog operations and own their transaction boundary."""
 
-    def __init__(self, session: Session) -> None:
+    def __init__(
+        self,
+        session: Session,
+        *,
+        embedding_service: EmbeddingService | None = None,
+    ) -> None:
         self._session = session
         self._repository = CatalogRepository(session)
+        self._embedding_service = embedding_service or SentenceTransformerEmbeddingService()
 
     def create_book(self, *, title: str, author: str) -> BookOverview:
         book = self._repository.add_book(Book(title=title, author=author))
@@ -97,6 +109,7 @@ class CatalogService:
                 kind=kind,
             ),
         )
+        self._refresh_note_chunks(note)
         self._commit()
         return note
 
@@ -128,6 +141,7 @@ class CatalogService:
             setattr(note, field_name, value)
 
         self._repository.flush()
+        self._refresh_note_chunks(note)
         self._commit()
         return note
 
@@ -146,6 +160,32 @@ class CatalogService:
         if note is None:
             raise ResourceNotFoundError("Note", note_id)
         return note
+
+    def _refresh_note_chunks(self, note: Note) -> None:
+        chunks = split_note_body(note.body)
+        embeddings = self._embedding_service.embed_texts(chunks)
+        if len(embeddings) != len(chunks):
+            raise ValueError("Embedding service returned the wrong number of vectors.")
+
+        self._repository.delete_chunks_for_note(note.id)
+        self._repository.flush()
+
+        for chunk_index, (content, embedding) in enumerate(zip(chunks, embeddings, strict=True)):
+            self._repository.add_note_chunk(
+                NoteChunk(
+                    note_id=note.id,
+                    chunk_index=chunk_index,
+                    content=content,
+                    embedding=embedding,
+                    embedding_model=getattr(
+                        self._embedding_service,
+                        "model_name",
+                        DEFAULT_EMBEDDING_MODEL,
+                    ),
+                ),
+            )
+
+        self._repository.flush()
 
     def _commit(self) -> None:
         try:

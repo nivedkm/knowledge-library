@@ -1,10 +1,20 @@
+from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from app.infrastructure.database.models import Book, Note, NoteChunk
+
+
+@dataclass(frozen=True)
+class SearchChunkCandidate:
+    chunk: NoteChunk
+    note: Note
+    book: Book
+    semantic_distance: float | None = None
+    keyword_rank: float | None = None
 
 
 class CatalogRepository:
@@ -86,6 +96,9 @@ class CatalogRepository:
         self._session.flush()
         return chunk
 
+    def delete_chunks_for_note(self, note_id: UUID) -> None:
+        self._session.execute(delete(NoteChunk).where(NoteChunk.note_id == note_id))
+
     def get_note(self, note_id: UUID) -> Note | None:
         return self._session.get(Note, note_id)
 
@@ -112,6 +125,119 @@ class CatalogRepository:
             .order_by(NoteChunk.chunk_index, NoteChunk.id)
         )
         return list(self._session.scalars(statement))
+
+    def list_notes_without_chunks(self) -> list[Note]:
+        statement = (
+            select(Note)
+            .outerjoin(NoteChunk, NoteChunk.note_id == Note.id)
+            .where(NoteChunk.id.is_(None))
+            .order_by(Note.created_at, Note.id)
+        )
+        return list(self._session.scalars(statement))
+
+    def search_chunks_by_embedding(
+        self,
+        query_embedding: list[float],
+        *,
+        limit: int,
+        kind: str | None = None,
+    ) -> list[SearchChunkCandidate]:
+        semantic_distance = NoteChunk.embedding.cosine_distance(query_embedding).label(
+            "semantic_distance",
+        )
+        statement = (
+            select(NoteChunk, Note, Book, semantic_distance)
+            .join(Note, NoteChunk.note_id == Note.id)
+            .join(Book, Note.book_id == Book.id)
+            .where(NoteChunk.embedding.is_not(None))
+            .order_by(semantic_distance.asc(), NoteChunk.updated_at.desc(), NoteChunk.id)
+            .limit(limit)
+        )
+        if kind is not None:
+            statement = statement.where(Note.kind == kind)
+
+        rows = self._session.execute(statement)
+        return [
+            SearchChunkCandidate(
+                chunk=row[0],
+                note=row[1],
+                book=row[2],
+                semantic_distance=float(row[3]),
+            )
+            for row in rows
+        ]
+
+    def search_chunks_by_keywords(
+        self,
+        query: str,
+        *,
+        limit: int,
+        kind: str | None = None,
+    ) -> list[SearchChunkCandidate]:
+        document = func.to_tsvector("english", NoteChunk.content)
+        ts_query = func.websearch_to_tsquery("english", query)
+        keyword_rank = func.ts_rank_cd(document, ts_query).label("keyword_rank")
+        statement = (
+            select(NoteChunk, Note, Book, keyword_rank)
+            .join(Note, NoteChunk.note_id == Note.id)
+            .join(Book, Note.book_id == Book.id)
+            .where(document.op("@@")(ts_query))
+            .order_by(keyword_rank.desc(), NoteChunk.updated_at.desc(), NoteChunk.id)
+            .limit(limit)
+        )
+        if kind is not None:
+            statement = statement.where(Note.kind == kind)
+
+        rows = self._session.execute(statement)
+        return [
+            SearchChunkCandidate(
+                chunk=row[0],
+                note=row[1],
+                book=row[2],
+                keyword_rank=float(row[3]),
+            )
+            for row in rows
+        ]
+
+    def search_notes_by_keywords(
+        self,
+        query: str,
+        *,
+        limit: int,
+        kind: str | None = None,
+    ) -> list[SearchChunkCandidate]:
+        note_document = func.to_tsvector(
+            "english",
+            func.concat_ws(
+                " ",
+                Note.title,
+                Note.body,
+                Note.source_location,
+            ),
+        )
+        ts_query = func.websearch_to_tsquery("english", query)
+        keyword_rank = func.ts_rank_cd(note_document, ts_query).label("keyword_rank")
+        statement = (
+            select(NoteChunk, Note, Book, keyword_rank)
+            .join(Note, NoteChunk.note_id == Note.id)
+            .join(Book, Note.book_id == Book.id)
+            .where(note_document.op("@@")(ts_query))
+            .order_by(keyword_rank.desc(), Note.updated_at.desc(), Note.id)
+            .limit(limit)
+        )
+        if kind is not None:
+            statement = statement.where(Note.kind == kind)
+
+        rows = self._session.execute(statement)
+        return [
+            SearchChunkCandidate(
+                chunk=row[0],
+                note=row[1],
+                book=row[2],
+                keyword_rank=float(row[3]),
+            )
+            for row in rows
+        ]
 
     def delete_note(self, note: Note) -> None:
         self._session.delete(note)

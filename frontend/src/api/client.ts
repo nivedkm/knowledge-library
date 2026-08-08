@@ -1,5 +1,4 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
 
 interface ApiErrorBody {
   detail?: string;
@@ -22,7 +21,9 @@ export async function apiRequest<T>(
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
-      ...(options.body === undefined ? {} : { "Content-Type": "application/json" }),
+      ...(options.body === undefined
+        ? {}
+        : { "Content-Type": "application/json" }),
       ...options.headers,
     },
   });
@@ -41,4 +42,3 @@ export async function apiRequest<T>(
 
   return (await response.json()) as T;
 }
-

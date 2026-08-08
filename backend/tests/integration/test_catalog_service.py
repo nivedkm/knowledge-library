@@ -7,10 +7,20 @@ from app.application.catalog.service import CatalogService
 from app.application.errors import ResourceNotFoundError
 
 
+class FakeEmbeddingService:
+    model_name = "fake-embeddings"
+
+    def embed_texts(self, texts: list[str]) -> list[list[float]]:
+        return [[float(index + 1)] * 384 for index, _text in enumerate(texts)]
+
+
 def test_service_manages_a_book_and_its_notes(
     database_session: Session,
 ) -> None:
-    service = CatalogService(database_session)
+    service = CatalogService(
+        database_session,
+        embedding_service=FakeEmbeddingService(),
+    )
     created_book = service.create_book(
         title="Make It Stick",
         author="Peter C. Brown",
@@ -52,7 +62,10 @@ def test_service_reports_a_missing_book(
     missing_id = uuid4()
 
     with pytest.raises(ResourceNotFoundError) as captured_error:
-        CatalogService(database_session).get_book(missing_id)
+        CatalogService(
+            database_session,
+            embedding_service=FakeEmbeddingService(),
+        ).get_book(missing_id)
 
     assert captured_error.value.resource_name == "Book"
     assert captured_error.value.resource_id == missing_id

@@ -143,7 +143,6 @@ export function BookDetailPage({ bookId }: BookDetailPageProps) {
         <div className="notes-column">
           <div className="section-heading section-heading--compact">
             <div>
-              <p className="eyebrow">What you kept</p>
               <h2>Notes</h2>
             </div>
           </div>
@@ -271,7 +270,6 @@ function NoteComposer({ bookId, onCreated }: { bookId: string; onCreated: () => 
   return (
     <form className="note-composer" onSubmit={handleSubmit}>
       <div>
-        <p className="form-kicker">Capture what matters</p>
         <h2>New {kind}</h2>
       </div>
       <EntryKindSwitch kind={kind} onChange={setKind} />
@@ -377,9 +375,8 @@ function NoteCard({ note, onChanged }: { note: Note; onChanged: () => void }) {
   return (
     <article className={`note-card note-card--${note.kind}`}>
       <div className="note-card__topline">
-        <span className="entry-kind">{note.kind}</span>
-        <span>{note.source_location ?? "General note"}</span>
         <time dateTime={note.updated_at}>{formatDate(note.updated_at)}</time>
+        <span>{note.source_location ?? ""}</span>
       </div>
       {note.title === null ? null : <h3>{note.title}</h3>}
       {note.kind === "quote" ? (
