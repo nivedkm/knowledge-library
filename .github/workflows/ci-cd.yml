@@ -64,7 +64,7 @@ jobs:
           uv sync --frozen --group dev
       - name: Run tests
         env:
-          DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/knowledge_library_test
+          WISDOM_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/knowledge_library_test
         run: |
           cd backend
           uv run pytest -q

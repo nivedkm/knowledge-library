@@ -19,6 +19,8 @@ WORKDIR /app/backend
 RUN pip install --no-cache-dir uv
 
 COPY backend/ ./
+# Copy root README.md because pyproject.toml references it as ../README.md
+COPY README.md /app/README.md
 RUN uv sync --frozen --no-dev
 
 COPY --from=frontend-build /app/frontend/dist ./app/static
