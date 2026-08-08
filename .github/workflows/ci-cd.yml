@@ -67,6 +67,7 @@ jobs:
           WISDOM_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5433/knowledge_library_test
         run: |
           cd backend
+          uv run alembic upgrade head
           uv run pytest -q
 
   build-and-publish:
