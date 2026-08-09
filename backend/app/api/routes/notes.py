@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Response, status
 
-from app.api.dependencies import DatabaseSession
+from app.api.dependencies import DatabaseSession, InjectedEmbeddingService
 from app.application.catalog.service import CatalogService
 from app.schemas.catalog import NoteResponse, NoteUpdate
 
@@ -19,8 +19,9 @@ def update_note(
     note_id: UUID,
     payload: NoteUpdate,
     session: DatabaseSession,
+    embedding_service: InjectedEmbeddingService,
 ) -> NoteResponse:
-    note = CatalogService(session).update_note(
+    note = CatalogService(session, embedding_service=embedding_service).update_note(
         note_id,
         changes=payload.changes(),
     )

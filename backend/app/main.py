@@ -5,10 +5,20 @@ from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from contextlib import asynccontextmanager
+import asyncio
+from app.application.search.embeddings import SentenceTransformerEmbeddingService
 from app.api.router import api_router
 from app.application.errors import ResourceNotFoundError
 from app.config.settings import get_settings
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.embedding_service = SentenceTransformerEmbeddingService()
+    # Start loading in the background to prevent slow startup
+    asyncio.create_task(asyncio.to_thread(app.state.embedding_service._load_model))
+    yield
 
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
@@ -16,6 +26,7 @@ def create_app() -> FastAPI:
     application = FastAPI(
         title=settings.api_title,
         version="0.1.0",
+        lifespan=lifespan,
     )
 
     application.add_middleware(

@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Query, Response, status
 
-from app.api.dependencies import DatabaseSession
+from app.api.dependencies import DatabaseSession, InjectedEmbeddingService
 from app.application.catalog.service import CatalogService
 from app.schemas.catalog import (
     BookCreate,
@@ -72,8 +72,9 @@ def create_note(
     book_id: UUID,
     payload: NoteCreate,
     session: DatabaseSession,
+    embedding_service: InjectedEmbeddingService,
 ) -> NoteResponse:
-    note = CatalogService(session).create_note(
+    note = CatalogService(session, embedding_service=embedding_service).create_note(
         book_id,
         title=payload.title,
         body=payload.body,
