@@ -100,30 +100,30 @@ export function BookDetailPage({ bookId }: BookDetailPageProps) {
   }
 
   if (book === null && error === null) {
-    return <main className="detail-page"><LoadingMessage label="Opening book…" /></main>;
+    return <main className="w-full max-w-site mx-auto pt-8 pb-24"><LoadingMessage label="Opening book…" /></main>;
   }
 
   if (book === null) {
     return (
-      <main className="detail-page">
-        <Link className="back-link" to="/">← Back to library</Link>
+      <main className="w-full max-w-site mx-auto pt-8 pb-24">
+        <Link className="inline-block my-4 mb-12 text-muted text-[0.84rem] font-bold no-underline hover:text-forest focus-ring" to="/">← Back to library</Link>
         <ErrorMessage message={error ?? "Book not found."} />
       </main>
     );
   }
 
   return (
-    <main className="detail-page">
-      <Link className="back-link" to="/">← Back to library</Link>
+    <main className="w-full max-w-site mx-auto pt-8 pb-24">
+      <Link className="inline-block my-4 mb-12 text-muted text-[0.84rem] font-bold no-underline hover:text-forest focus-ring" to="/">← Back to library</Link>
 
-      <section className="book-header">
+      <section className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-6 md:gap-12 items-start pb-16">
         <div>
-          <p className="eyebrow">Book notes</p>
-          <h1>{book.title}</h1>
-          <p className="book-author">by {book.author}</p>
-          <div className="book-facts">
-            <span>{book.note_count} {book.note_count === 1 ? "note" : "notes"}</span>
-            <span>Last activity {formatRelativeDate(book.last_activity_at)}</span>
+          <p className="mb-[0.9rem] text-forest opacity-90 text-[0.72rem] font-extrabold tracking-[0.16em] uppercase">Book notes</p>
+          <h1 className="max-w-[14ch] mb-4 font-serif text-[clamp(3.2rem,7vw,6rem)] font-medium leading-none m-0">{book.title}</h1>
+          <p className="mb-5 text-muted text-[1.15rem] m-0">by {book.author}</p>
+          <div className="flex flex-wrap gap-2.5">
+            <span className="px-3 py-2 border border-line rounded-full text-muted text-[0.76rem] font-bold">{book.note_count} {book.note_count === 1 ? "note" : "notes"}</span>
+            <span className="px-3 py-2 border border-line rounded-full text-muted text-[0.76rem] font-bold">Last activity {formatRelativeDate(book.last_activity_at)}</span>
           </div>
         </div>
         <BookSettings
@@ -138,20 +138,20 @@ export function BookDetailPage({ bookId }: BookDetailPageProps) {
         <ErrorMessage message={error} onRetry={() => void loadData()} />
       )}
 
-      <section className="notes-layout">
+      <section className="grid grid-cols-1 md:grid-cols-[minmax(18rem,0.65fr)_minmax(0,1.35fr)] gap-[clamp(2rem,6vw,5rem)] items-start pt-16 border-t border-line">
         <NoteComposer bookId={book.id} onCreated={() => void loadData()} />
-        <div className="notes-column">
-          <div className="section-heading section-heading--compact">
+        <div className="min-w-0">
+          <div className="flex items-end justify-between gap-8 mb-5">
             <div>
-              <h2>Notes</h2>
+              <h2 className="m-0 font-serif text-4xl font-medium tracking-tight">Notes</h2>
             </div>
           </div>
 
           {notes === null ? <LoadingMessage label="Loading notes…" /> : null}
           {notes?.length === 0 ? (
-            <div className="empty-state empty-state--compact">
-              <h3>No notes yet</h3>
-              <p>Capture the first idea from this book.</p>
+            <div className="grid min-h-[12rem] place-items-center content-center border border-dashed border-line rounded-2xl text-muted text-center">
+              <h3 className="mb-1.5 text-ink font-serif text-[1.75rem] font-medium m-0">No notes yet</h3>
+              <p className="m-0">Capture the first idea from this book.</p>
             </div>
           ) : null}
           {notes?.map((note) => (
@@ -201,23 +201,29 @@ function BookSettings({
     }
   }
 
+  const inputClass = "w-full border border-line rounded-lg text-ink bg-surface-strong px-4 py-3 text-[0.95rem] font-medium leading-relaxed focus-ring placeholder:text-muted/50";
+  const labelClass = "grid gap-2 text-ink/80 text-[0.78rem] font-extrabold tracking-wide";
+  const primaryButtonClass = "inline-flex min-h-[2.75rem] items-center justify-center rounded-full px-5 py-3 text-sm font-extrabold cursor-pointer text-paper bg-forest disabled:opacity-60 disabled:cursor-wait focus-ring";
+  const quietButtonClass = "inline-flex min-h-[2.75rem] items-center justify-center rounded-full px-5 py-3 text-sm font-extrabold cursor-pointer border border-line text-ink bg-transparent focus-ring";
+  const dangerButtonClass = "inline-flex min-h-[2.75rem] items-center justify-center rounded-full px-5 py-3 text-sm font-extrabold cursor-pointer border border-[rgb(168_77_50/0.3)] text-rust bg-transparent focus-ring disabled:opacity-60 disabled:cursor-wait";
+
   if (isEditing) {
     return (
-      <form className="settings-card" onSubmit={handleSubmit}>
-        <label>
+      <form className="grid gap-4 p-5 w-full md:w-[22rem] border border-line rounded-2xl bg-surface shadow-custom" onSubmit={handleSubmit}>
+        <label className={labelClass}>
           Title
-          <input required maxLength={255} value={title} onChange={(event) => setTitle(event.target.value)} />
+          <input className={inputClass} required maxLength={255} value={title} onChange={(event) => setTitle(event.target.value)} />
         </label>
-        <label>
+        <label className={labelClass}>
           Author
-          <input required maxLength={255} value={author} onChange={(event) => setAuthor(event.target.value)} />
+          <input className={inputClass} required maxLength={255} value={author} onChange={(event) => setAuthor(event.target.value)} />
         </label>
-        {error === null ? null : <p className="field-error" role="alert">{error}</p>}
-        <div className="button-row">
-          <button className="button button--primary" disabled={isSaving}>
+        {error === null ? null : <p className="text-rust text-[0.8rem] font-bold m-0" role="alert">{error}</p>}
+        <div className="flex flex-wrap gap-2.5">
+          <button className={primaryButtonClass} disabled={isSaving}>
             {isSaving ? "Saving…" : "Save"}
           </button>
-          <button className="button button--quiet" type="button" onClick={() => setIsEditing(false)}>
+          <button className={quietButtonClass} type="button" onClick={() => setIsEditing(false)}>
             Cancel
           </button>
         </div>
@@ -226,11 +232,11 @@ function BookSettings({
   }
 
   return (
-    <div className="book-actions">
-      <button className="button button--quiet" type="button" onClick={() => setIsEditing(true)}>
+    <div className="flex flex-wrap gap-2.5">
+      <button className={quietButtonClass} type="button" onClick={() => setIsEditing(true)}>
         Edit book
       </button>
-      <button className="button button--danger" type="button" disabled={isDeleting} onClick={onDelete}>
+      <button className={dangerButtonClass} type="button" disabled={isDeleting} onClick={onDelete}>
         {isDeleting ? "Deleting…" : "Delete"}
       </button>
     </div>
@@ -267,26 +273,30 @@ function NoteComposer({ bookId, onCreated }: { bookId: string; onCreated: () => 
     }
   }
 
+  const inputClass = "w-full border border-line rounded-lg text-ink bg-surface-strong px-4 py-3 text-[0.95rem] font-medium leading-relaxed focus-ring placeholder:text-muted/50";
+  const labelClass = "grid gap-2 text-ink/80 text-[0.78rem] font-extrabold tracking-wide";
+  const primaryButtonClass = "inline-flex min-h-[2.75rem] items-center justify-center rounded-full px-5 py-3 text-sm font-extrabold cursor-pointer text-paper bg-forest disabled:opacity-60 disabled:cursor-wait focus-ring";
+
   return (
-    <form className="note-composer" onSubmit={handleSubmit}>
+    <form className="grid gap-4 p-5 md:sticky md:top-6 border border-line rounded-2xl bg-surface shadow-custom" onSubmit={handleSubmit}>
       <div>
-        <h2>New {kind}</h2>
+        <h2 className="m-0 font-serif text-[2rem] font-medium">New {kind}</h2>
       </div>
       <EntryKindSwitch kind={kind} onChange={setKind} />
-      <label>
-        Heading <span>optional</span>
-        <input maxLength={255} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="What is this idea about?" />
+      <label className={labelClass}>
+        <span>Heading <span className="text-muted font-medium">optional</span></span>
+        <input className={inputClass} maxLength={255} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="What is this idea about?" />
       </label>
-      <label>
+      <label className={labelClass}>
         {kind === "quote" ? "Quote" : "Your note"}
-        <textarea required maxLength={100000} rows={9} value={body} onChange={(event) => setBody(event.target.value)} placeholder={kind === "quote" ? "Copy the passage exactly…" : "Write the idea in your own words…"} />
+        <textarea className={inputClass} required maxLength={100000} rows={9} value={body} onChange={(event) => setBody(event.target.value)} placeholder={kind === "quote" ? "Copy the passage exactly…" : "Write the idea in your own words…"} />
       </label>
-      <label>
-        Source <span>optional</span>
-        <input maxLength={100} value={sourceLocation} onChange={(event) => setSourceLocation(event.target.value)} placeholder="Page 42 or Chapter 3" />
+      <label className={labelClass}>
+        <span>Source <span className="text-muted font-medium">optional</span></span>
+        <input className={inputClass} maxLength={100} value={sourceLocation} onChange={(event) => setSourceLocation(event.target.value)} placeholder="Page 42 or Chapter 3" />
       </label>
-      {error === null ? null : <p className="field-error" role="alert">{error}</p>}
-      <button className="button button--primary" disabled={isSaving}>
+      {error === null ? null : <p className="text-rust text-[0.8rem] font-bold m-0" role="alert">{error}</p>}
+      <button className={primaryButtonClass} disabled={isSaving}>
         {isSaving ? "Saving…" : `Save ${kind}`}
       </button>
     </form>
@@ -343,28 +353,33 @@ function NoteCard({ note, onChanged }: { note: Note; onChanged: () => void }) {
     }
   }
 
+  const inputClass = "w-full border border-line rounded-lg text-ink bg-surface-strong px-4 py-3 text-[0.95rem] font-medium leading-relaxed focus-ring placeholder:text-muted/50";
+  const labelClass = "grid gap-2 text-ink/80 text-[0.78rem] font-extrabold tracking-wide";
+  const primaryButtonClass = "inline-flex min-h-[2.75rem] items-center justify-center rounded-full px-5 py-3 text-sm font-extrabold cursor-pointer text-paper bg-forest disabled:opacity-60 disabled:cursor-wait focus-ring";
+  const quietButtonClass = "inline-flex min-h-[2.75rem] items-center justify-center rounded-full px-5 py-3 text-sm font-extrabold cursor-pointer border border-line text-ink bg-transparent focus-ring";
+
   if (isEditing) {
     return (
-      <form className={`note-card note-card--editing note-card--${kind}`} onSubmit={handleUpdate}>
-        <label>
+      <form className="grid gap-4 p-6 border border-line rounded-2xl bg-surface" onSubmit={handleUpdate}>
+        <label className={labelClass}>
           Heading
-          <input maxLength={255} value={title} onChange={(event) => setTitle(event.target.value)} />
+          <input className={inputClass} maxLength={255} value={title} onChange={(event) => setTitle(event.target.value)} />
         </label>
-        <label>
+        <label className={labelClass}>
           {kind === "quote" ? "Quote" : "Note"}
-          <textarea required maxLength={100000} rows={7} value={body} onChange={(event) => setBody(event.target.value)} />
+          <textarea className={inputClass} required maxLength={100000} rows={7} value={body} onChange={(event) => setBody(event.target.value)} />
         </label>
         <EntryKindSwitch kind={kind} onChange={setKind} />
-        <label>
+        <label className={labelClass}>
           Source
-          <input maxLength={100} value={sourceLocation} onChange={(event) => setSourceLocation(event.target.value)} />
+          <input className={inputClass} maxLength={100} value={sourceLocation} onChange={(event) => setSourceLocation(event.target.value)} />
         </label>
-        {error === null ? null : <p className="field-error" role="alert">{error}</p>}
-        <div className="button-row">
-          <button className="button button--primary" disabled={isSaving}>
+        {error === null ? null : <p className="text-rust text-[0.8rem] font-bold m-0" role="alert">{error}</p>}
+        <div className="flex flex-wrap gap-2.5">
+          <button className={primaryButtonClass} disabled={isSaving}>
             {isSaving ? "Saving…" : "Save changes"}
           </button>
-          <button className="button button--quiet" type="button" onClick={() => setIsEditing(false)}>
+          <button className={quietButtonClass} type="button" onClick={() => setIsEditing(false)}>
             Cancel
           </button>
         </div>
@@ -372,22 +387,25 @@ function NoteCard({ note, onChanged }: { note: Note; onChanged: () => void }) {
     );
   }
 
+  const baseCardClass = "grid gap-4 py-6 border-t border-line first:border-t-0";
+  const quoteCardClass = "grid gap-4 p-6 border border-accent-border rounded-2xl bg-accent-soft mt-4 first:mt-0";
+
   return (
-    <article className={`note-card note-card--${note.kind}`}>
-      <div className="note-card__topline">
+    <article className={note.kind === 'quote' ? quoteCardClass : baseCardClass}>
+      <div className="flex justify-between gap-4 text-muted text-[0.73rem] font-bold uppercase tracking-[0.07em]">
         <time dateTime={note.updated_at}>{formatDate(note.updated_at)}</time>
         <span>{note.source_location ?? ""}</span>
       </div>
-      {note.title === null ? null : <h3>{note.title}</h3>}
+      {note.title === null ? null : <h3 className="m-0 font-serif text-[1.55rem] font-medium">{note.title}</h3>}
       {note.kind === "quote" ? (
-        <blockquote className="quote-body">{note.body}</blockquote>
+        <blockquote className="m-0 pl-[1.15rem] border-l-[3px] border-quote-border text-quote-ink font-serif text-[1.15rem] italic leading-[1.65] break-words whitespace-pre-wrap">{note.body}</blockquote>
       ) : (
-        <p className="note-body">{note.body}</p>
+        <p className="m-0 text-ink leading-relaxed break-words whitespace-pre-wrap">{note.body}</p>
       )}
-      {error === null ? null : <p className="field-error" role="alert">{error}</p>}
-      <div className="note-actions">
-        <button type="button" onClick={() => setIsEditing(true)}>Edit</button>
-        <button type="button" onClick={() => void handleDelete()}>Delete</button>
+      {error === null ? null : <p className="text-rust text-[0.8rem] font-bold m-0" role="alert">{error}</p>}
+      <div className="flex justify-end gap-2">
+        <button className="min-h-0 px-3 py-1.5 text-[0.7rem] inline-flex items-center justify-center rounded-full font-extrabold cursor-pointer border border-line text-ink bg-transparent focus-ring hover:bg-surface" type="button" onClick={() => setIsEditing(true)}>Edit</button>
+        <button className="min-h-0 px-3 py-1.5 text-[0.7rem] inline-flex items-center justify-center rounded-full font-extrabold cursor-pointer border border-line text-ink bg-transparent focus-ring hover:bg-surface" type="button" onClick={() => void handleDelete()}>Delete</button>
       </div>
     </article>
   );
@@ -400,10 +418,13 @@ function EntryKindSwitch({
   kind: NoteKind;
   onChange: (kind: NoteKind) => void;
 }) {
+  const baseOptionClass = "border-0 rounded-full px-[0.9rem] py-[0.4rem] bg-transparent text-muted text-[0.72rem] font-extrabold cursor-pointer focus-ring";
+  const selectedOptionClass = "text-ink bg-surface shadow-[0_0.1rem_0.25rem_var(--shadow-color)]";
+
   return (
-    <div className="kind-switch" role="group" aria-label="Entry type">
+    <div className="inline-flex w-fit p-[0.2rem] border border-line rounded-full bg-surface-strong" role="group" aria-label="Entry type">
       <button
-        className={kind === "note" ? "kind-switch__option is-selected" : "kind-switch__option"}
+        className={`${baseOptionClass} ${kind === 'note' ? selectedOptionClass : ''}`}
         type="button"
         aria-pressed={kind === "note"}
         onClick={() => onChange("note")}
@@ -411,7 +432,7 @@ function EntryKindSwitch({
         Note
       </button>
       <button
-        className={kind === "quote" ? "kind-switch__option is-selected" : "kind-switch__option"}
+        className={`${baseOptionClass} ${kind === 'quote' ? selectedOptionClass : ''}`}
         type="button"
         aria-pressed={kind === "quote"}
         onClick={() => onChange("quote")}
