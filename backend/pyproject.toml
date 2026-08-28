@@ -2,7 +2,6 @@
 name = "wisdom-api"
 version = "0.1.0"
 description = "Local-first personal knowledge retrieval API"
-readme = "../README.md"
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.14,<2.0",
